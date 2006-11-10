@@ -18,7 +18,7 @@ OBJFILES = Project2.obj Unit1.obj Unit2.obj
 RESFILES = Project2.res
 RESDEPEN = $(RESFILES) Unit1.dfm Unit2.dfm
 LIBFILES =
-LIBRARIES = VCL40.lib
+LIBRARIES =
 SPARELIBS = VCL40.lib
 PACKAGES = VCL40.bpi VCLX40.bpi VCLJPG40.bpi bcbsmp40.bpi QRPT40.bpi VCLDB40.bpi \
   ibsmp40.bpi VCLDBX40.bpi TEEUI40.bpi TEEDB40.bpi TEE40.bpi nmfast40.bpi \
@@ -32,24 +32,24 @@ PATHRC = .;
 DEBUGLIBPATH = $(BCB)\lib\debug
 RELEASELIBPATH = $(BCB)\lib\release
 USERDEFINES =
-SYSDEFINES = NO_STRICT
+SYSDEFINES = NO_STRICT;_RTLDLL;USEPACKAGES
 # ---------------------------------------------------------------------------
 CFLAG1 = -I"C:\Program Files\Borland\CBuilder4\Projects\";"..\..\..\..\Arquivos de Programas\Borland\CBuilder4\Projects";$(BCB)\include;$(BCB)\include\vcl \
-  -O2 -Hc -H=$(BCB)\lib\vcl40.csm -w -Ve -a8 -5 -k- -vi -c -b- -w-par -w-inl -Vx \
-  -tW -tWM -D$(SYSDEFINES);$(USERDEFINES)
-PFLAGS = -U"C:\Program Files\Borland\CBuilder4\Projects\";"..\..\..\..\Arquivos de Programas\Borland\CBuilder4\Projects";$(BCB)\lib\obj;$(BCB)\lib;$(RELEASELIBPATH) \
+  -Od -Hc -H=$(BCB)\lib\vcl40.csm -w -Ve -r- -a8 -5 -k -y -v -vi- -c -b- -w-par \
+  -w-inl -Vx -tW -tWM -D$(SYSDEFINES);$(USERDEFINES)
+PFLAGS = -U"C:\Program Files\Borland\CBuilder4\Projects\";"..\..\..\..\Arquivos de Programas\Borland\CBuilder4\Projects";$(BCB)\lib\obj;$(BCB)\lib;$(DEBUGLIBPATH) \
   -I"C:\Program Files\Borland\CBuilder4\Projects\";"..\..\..\..\Arquivos de Programas\Borland\CBuilder4\Projects";$(BCB)\include;$(BCB)\include\vcl \
-  -$Y- -$L- -$D- -v -JPHNE -M
+  -$Y+ -$W -$O- -v -JPHNE -M
 RFLAGS = -i"C:\Program Files\Borland\CBuilder4\Projects\";"..\..\..\..\Arquivos de Programas\Borland\CBuilder4\Projects";$(BCB)\include;$(BCB)\include\vcl
 AFLAGS = /i"C:\Program Files\Borland\CBuilder4\Projects\" \
   /i"..\..\..\..\Arquivos de Programas\Borland\CBuilder4\Projects" \
-  /i$(BCB)\include /i$(BCB)\include\vcl /mx /w2 /zn
-LFLAGS = -L"C:\Program Files\Borland\CBuilder4\Projects\";"..\..\..\..\Arquivos de Programas\Borland\CBuilder4\Projects";$(BCB)\lib\obj;$(BCB)\lib;$(RELEASELIBPATH) \
-  -aa -Tpe -x -Gn
+  /i$(BCB)\include /i$(BCB)\include\vcl /mx /w2 /zi
+LFLAGS = -L"C:\Program Files\Borland\CBuilder4\Projects\";"..\..\..\..\Arquivos de Programas\Borland\CBuilder4\Projects";$(BCB)\lib\obj;$(BCB)\lib;$(DEBUGLIBPATH) \
+  -aa -Tpe -x -Gn -v
 # ---------------------------------------------------------------------------
-ALLOBJ = c0w32.obj sysinit.obj $(OBJFILES)
+ALLOBJ = c0w32.obj Memmgr.Lib $(PACKAGES) sysinit.obj $(OBJFILES)
 ALLRES = $(RESFILES)
-ALLLIB = $(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib
+ALLLIB = $(LIBFILES) $(LIBRARIES) import32.lib cp32mti.lib
 # ---------------------------------------------------------------------------
 !ifdef IDEOPTIONS
 
@@ -59,7 +59,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=3
+Build=9
 Debug=0
 PreRelease=0
 Special=0
@@ -71,7 +71,7 @@ CodePage=1252
 [Version Info Keys]
 CompanyName=
 FileDescription=
-FileVersion=1.0.0.3
+FileVersion=1.0.0.9
 InternalName=
 LegalCopyright=
 LegalTrademarks=

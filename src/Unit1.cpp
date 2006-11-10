@@ -24,161 +24,160 @@ Grafo *Graph = NULL;
 __fastcall TEmergencyHelper::TEmergencyHelper(TComponent* Owner)
     : TForm(Owner)
 {
-        MenuComando->Enabled = false;
-
-        MenuArquivoFechar->Enabled = false;
-        ToolButtonFechar->Enabled = false;
+	MenuComando->Enabled = false;
+    MenuArquivoFechar->Enabled = false;
+	ToolButtonFechar->Enabled = false;
 }
 
 //---------------------------------------------------------------------------
 /* Criar um novo grafo a partir de um arquivo */
 void TEmergencyHelper::AbrirGrafo() {
-        if (OpenDialog->Execute()) {
-                Graph = new Grafo(OpenDialog->FileName.c_str());
-                CalcularEscala();
-                ImagemGrafo->Canvas->FloodFill(0, 0, clBtnFace, fsBorder);
-                for (int i = 1; i <= Graph->pegarNumeroArestas(); i++) {
-                        TPoint origem, destino;
-                        int *aresta;
-                        aresta = Graph->pegarAresta(i);
-                        origem = Graph->pegarPonto(aresta[0]);
-                        destino = Graph->pegarPonto(aresta[1]);
-                        origem.x *= escala;
-                        origem.y *= escala;
-                        destino.x *= escala;
-                        destino.y *= escala;
-                        DesenharAresta(origem, destino, clBlack);
-                        delete []aresta;
-                }
+	// Se ocorrer algum erro durante a escolha do nome de um arquivo, não faz nada e sai.
+	if (OpenDialog->Execute() == false) {
+    	return;
+    }
 
-                for (int i = 1; i <= Graph->pegarNumeroVertices(); i++) {
-                        TPoint p = Graph->pegarPonto(i);
-                        p.x *= escala;
-                        p.y *= escala;
-                        DesenharCirculo(clWhite, p, i);
-                }
+	Graph = new Grafo(OpenDialog->FileName.c_str());
+	CalcularEscala();
+	ImagemGrafo->Canvas->FloodFill(0, 0, clBtnFace, fsBorder);
 
-                Graph->calcularCustos();
-                Graph->calcularRotas();
+    for (int i = 1; i <= Graph->pegarNumeroArestas(); i++) {
+		TPoint origem, destino;
+		int *aresta;
+		aresta = Graph->pegarAresta(i);
+		origem = Graph->pegarPonto(aresta[0]);
+		destino = Graph->pegarPonto(aresta[1]);
+		origem.x *= escala;
+		origem.y *= escala;
+		destino.x *= escala;
+		destino.y *= escala;
+		DesenharAresta(origem, destino, clBlack);
+		delete[] aresta;
+	}
 
-	        MenuComando->Enabled = true;
+	for (int i = 1; i <= Graph->pegarNumeroVertices(); i++) {
+		TPoint p = Graph->pegarPonto(i);
+		p.x *= escala;
+		p.y *= escala;
+		DesenharCirculo(clWhite, p, i);
+	}
 
-	        ToolButtonDistribuirAmbulancias->Enabled = true;
-        	MenuComandoDistribuirAmbulancias->Enabled = true;
+	Graph->aplicarFloyd();
 
-		ToolButtonConstruirHospitais->Enabled = true;
-	        MenuComandoConstruirHospitais->Enabled = true;
+    MenuComando->Enabled = true;
 
-               	ToolButtonGerarAcidente->Enabled = true;
-	        MenuComandoGerarAcidente->Enabled = true;
+	ToolButtonDistribuirAmbulancias->Enabled = true;
+	MenuComandoDistribuirAmbulancias->Enabled = true;
 
-	        ToolButtonAcharMelhorRota->Enabled = false;
-        	MenuComandoAcharMelhorRota->Enabled = false;
+	ToolButtonConstruirHospitais->Enabled = true;
+	MenuComandoConstruirHospitais->Enabled = true;
 
-                ToolButtonFechar->Enabled = true;
-        	MenuArquivoFechar->Enabled = true;
+	ToolButtonGerarAcidente->Enabled = true;
+	MenuComandoGerarAcidente->Enabled = true;
 
-                ToolButtonAbrir->Enabled = false;
-	        MenuArquivoAbrir->Enabled = false;
+	ToolButtonAcharMelhorRota->Enabled = false;
+	MenuComandoAcharMelhorRota->Enabled = false;
 
-        } else {
-        }
+	ToolButtonFechar->Enabled = true;
+	MenuArquivoFechar->Enabled = true;
+
+	ToolButtonAbrir->Enabled = false;
+	MenuArquivoAbrir->Enabled = false;
 }
 
 //---------------------------------------------------------------------------
-/* Criar um novo grafo a partir de um arquivo */
 void TEmergencyHelper::GerarAcidente() {
-        if (!ToolButtonConstruirHospitais->Enabled && !ToolButtonDistribuirAmbulancias->Enabled) {
-	        ToolButtonAcharMelhorRota->Enabled = true;
-        	MenuComandoAcharMelhorRota->Enabled = true;
-        }
+	if (!ToolButtonConstruirHospitais->Enabled && !ToolButtonDistribuirAmbulancias->Enabled) {
+		ToolButtonAcharMelhorRota->Enabled = true;
+		MenuComandoAcharMelhorRota->Enabled = true;
+	}
 
-        randomize();
-        do
-        	acidente = rand() % (Graph->pegarNumeroVertices() + 1);
-        while (acidente == 0);
-        TPoint p = Graph->pegarPonto(acidente);
-        p.x *= escala;
-        p.y *= escala;
-        DesenharQuadrado(clYellow, p, acidente);
+	randomize();
+	do
+		acidente = rand() % (Graph->pegarNumeroVertices() + 1);
+	while (acidente == 0);
+
+    TPoint p = Graph->pegarPonto(acidente);
+	p.x *= escala;
+	p.y *= escala;
+	DesenharQuadrado(clYellow, p, acidente);
 }
 
 //---------------------------------------------------------------------------
 void TEmergencyHelper::FecharGrafo() {
-        ImagemGrafo->Canvas->FloodFill(0, 0, clBtnFace, fsBorder);
+	ImagemGrafo->Canvas->FloodFill(0, 0, clBtnFace, fsBorder);
 
-        if (Graph != NULL) {
-	        delete Graph;
-                Graph = NULL;
-        }
+	if (Graph != NULL) {
+		delete Graph;
+		Graph = NULL;
+	}
 
-        acidente = 0;
-        escala = 0;
+	acidente = 0;
+	escala = 0;
 
-        ToolButtonDistribuirAmbulancias->Enabled = false;
-        MenuComandoDistribuirAmbulancias->Enabled = false;
+	ToolButtonDistribuirAmbulancias->Enabled = false;
+	MenuComandoDistribuirAmbulancias->Enabled = false;
 
 	ToolButtonConstruirHospitais->Enabled = false;
-        MenuComandoConstruirHospitais->Enabled = false;
+    MenuComandoConstruirHospitais->Enabled = false;
 
 	ToolButtonGerarAcidente->Enabled = false;
-        MenuComandoGerarAcidente->Enabled = false;
+	MenuComandoGerarAcidente->Enabled = false;
 
-        ToolButtonAcharMelhorRota->Enabled = false;
-        MenuComandoAcharMelhorRota->Enabled = false;
+    ToolButtonAcharMelhorRota->Enabled = false;
+	MenuComandoAcharMelhorRota->Enabled = false;
 
-        ToolButtonFechar->Enabled = false;
-        MenuArquivoFechar->Enabled = false;
+    ToolButtonFechar->Enabled = false;
+	MenuArquivoFechar->Enabled = false;
 
-        ToolButtonAbrir->Enabled = true;
-        MenuArquivoAbrir->Enabled = true;
+	ToolButtonAbrir->Enabled = true;
+	MenuArquivoAbrir->Enabled = true;
 
 	MenuComando->Enabled = false;
-
 }
 
 //---------------------------------------------------------------------------
 void TEmergencyHelper::DistribuirAmbulancias() {
-        ToolButtonDistribuirAmbulancias->Enabled = false;
-        MenuComandoDistribuirAmbulancias->Enabled = false;
+	ToolButtonDistribuirAmbulancias->Enabled = false;
+	MenuComandoDistribuirAmbulancias->Enabled = false;
 
-        if (!ToolButtonConstruirHospitais->Enabled && acidente != 0) {
-	        ToolButtonAcharMelhorRota->Enabled = true;
-        	MenuComandoAcharMelhorRota->Enabled = true;
-        }
+	if (!ToolButtonConstruirHospitais->Enabled && acidente != 0) {
+		ToolButtonAcharMelhorRota->Enabled = true;
+		MenuComandoAcharMelhorRota->Enabled = true;
+	}
 
-        Graph->gerarCentros(3);
+	Graph->gerarCentros(3);
 
-        for (int i = 0; i < Graph->pegarNumeroCentros(); i++) {
-        	int ambulancia;
-                ambulancia = Graph->pegarCentro(i);
-        	TPoint p = Graph->pegarPonto(ambulancia);
-                p.x *= escala;
-                p.y *=escala;
-                DesenharQuadrado(clLime, p, ambulancia);
-        }
+	for (int i = 1; i <= Graph->pegarNumeroCentros(); i++) {
+		int ambulancia;
+		ambulancia = Graph->pegarCentro(i);
+		TPoint p = Graph->pegarPonto(ambulancia);
+		p.x *= escala;
+		p.y *=escala;
+		DesenharQuadrado(clLime, p, ambulancia);
+	}
 }
 
 //---------------------------------------------------------------------------
 void TEmergencyHelper::ConstruirHospitais() {
 	ToolButtonConstruirHospitais->Enabled = false;
-        MenuComandoConstruirHospitais->Enabled = false;
+	MenuComandoConstruirHospitais->Enabled = false;
 
-        Graph->gerarCentrosEmergencia(4);
+	Graph->gerarCentrosEmergencia(4);
 
-        if (!ToolButtonDistribuirAmbulancias->Enabled && acidente != 0) {
-	        ToolButtonAcharMelhorRota->Enabled = true;
-        	MenuComandoAcharMelhorRota->Enabled = true;
-        }
+	if (!ToolButtonDistribuirAmbulancias->Enabled && acidente != 0) {
+		ToolButtonAcharMelhorRota->Enabled = true;
+		MenuComandoAcharMelhorRota->Enabled = true;
+	}
 
-	for (int i = 0; i < Graph->pegarNumeroCentrosEmergencia(); i++) {
-        	int hospital;
-                hospital = Graph->pegarCentroEmergencia(i);
-        	TPoint p = Graph->pegarPonto(hospital);
-                p.x *= escala;
-                p.y *= escala;
-                DesenharCirculo(clBlue, p, hospital);
-        }
+	for (int i = 1; i <= Graph->pegarNumeroCentrosEmergencia(); i++) {
+		int hospital;
+		hospital = Graph->pegarCentroEmergencia(i);
+		TPoint p = Graph->pegarPonto(hospital);
+		p.x *= escala;
+		p.y *= escala;
+		DesenharCirculo(clBlue, p, hospital);
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -186,17 +185,17 @@ void TEmergencyHelper::DesenharQuadrado(TColor cor, TPoint p, AnsiString texto) 
 	TColor cor_antiga;
 	cor_antiga = ImagemGrafo->Canvas->Brush->Color;
 	p.x += 10;
-        p.y += 10;
-        ImagemGrafo->Canvas->MoveTo(p.x , p.y);
-        ImagemGrafo->Canvas->Brush->Color = cor;
-    	ImagemGrafo->Canvas->Rectangle(p.x - 5, p.y - 5, p.x + 5, p.y  + 5);
-        ImagemGrafo->Canvas->TextFlags = ETO_OPAQUE;
-    	if (StrToInt(texto) < 10) {
-                ImagemGrafo->Canvas->TextOut(p.x - 3, p.y - 6, texto);
-        } else {
-                ImagemGrafo->Canvas->TextOut(p.x - 6, p.y - 6, texto);
-        }
-        ImagemGrafo->Canvas->Brush->Color = cor_antiga;
+	p.y += 10;
+	ImagemGrafo->Canvas->MoveTo(p.x , p.y);
+	ImagemGrafo->Canvas->Brush->Color = cor;
+	ImagemGrafo->Canvas->Rectangle(p.x - 5, p.y - 5, p.x + 5, p.y  + 5);
+	ImagemGrafo->Canvas->TextFlags = ETO_OPAQUE;
+	if (StrToInt(texto) < 10) {
+		ImagemGrafo->Canvas->TextOut(p.x - 3, p.y - 6, texto);
+	} else {
+		ImagemGrafo->Canvas->TextOut(p.x - 6, p.y - 6, texto);
+	}
+	ImagemGrafo->Canvas->Brush->Color = cor_antiga;
 }
 
 //---------------------------------------------------------------------------
@@ -204,17 +203,17 @@ void TEmergencyHelper::DesenharCirculo(TColor cor, TPoint p, AnsiString texto) {
 	TColor cor_antiga;
 	cor_antiga = ImagemGrafo->Canvas->Brush->Color;
 	p.x += 10;
-        p.y += 10;
-        ImagemGrafo->Canvas->MoveTo(p.x, p.y);
-        ImagemGrafo->Canvas->Brush->Color = cor;
-    	ImagemGrafo->Canvas->Ellipse(p.x - 9, p.y - 9, p.x + 9, p.y + 9);
-        ImagemGrafo->Canvas->TextFlags = ETO_OPAQUE;
-    	if (StrToInt(texto) < 10) {
-                ImagemGrafo->Canvas->TextOut(p.x - 3, p.y - 6, texto);
-        } else {
-                ImagemGrafo->Canvas->TextOut(p.x - 6, p.y - 6, texto);
-        }
-        ImagemGrafo->Canvas->Brush->Color = cor_antiga;
+	p.y += 10;
+	ImagemGrafo->Canvas->MoveTo(p.x, p.y);
+	ImagemGrafo->Canvas->Brush->Color = cor;
+	ImagemGrafo->Canvas->Ellipse(p.x - 9, p.y - 9, p.x + 9, p.y + 9);
+	ImagemGrafo->Canvas->TextFlags = ETO_OPAQUE;
+	if (StrToInt(texto) < 10) {
+		ImagemGrafo->Canvas->TextOut(p.x - 3, p.y - 6, texto);
+	} else {
+		ImagemGrafo->Canvas->TextOut(p.x - 6, p.y - 6, texto);
+	}
+	ImagemGrafo->Canvas->Brush->Color = cor_antiga;
 }
 
 //---------------------------------------------------------------------------
@@ -222,16 +221,16 @@ void TEmergencyHelper::DesenharAresta(TPoint origem, TPoint destino, TColor cor)
 	TColor cor_antiga;
 	cor_antiga = ImagemGrafo->Canvas->Pen->Color;
 	if (origem.x == destino.x && origem.y == destino.y)
-        	return;
+		return;
 	origem.x += 10;
-        origem.y += 10;
-        destino.x += 10;
-        destino.y += 10;
-        ImagemGrafo->Canvas->MoveTo(origem.x, origem.y);
-        ImagemGrafo->Canvas->Pen->Color = cor;
-        ImagemGrafo->Canvas->LineTo(destino.x , destino.y);
-        DesenharSeta(origem, destino);
-        ImagemGrafo->Canvas->Pen->Color = cor_antiga;
+	origem.y += 10;
+	destino.x += 10;
+	destino.y += 10;
+	ImagemGrafo->Canvas->MoveTo(origem.x, origem.y);
+	ImagemGrafo->Canvas->Pen->Color = cor;
+	ImagemGrafo->Canvas->LineTo(destino.x , destino.y);
+	DesenharSeta(origem, destino);
+	ImagemGrafo->Canvas->Pen->Color = cor_antiga;
 }
 
 //---------------------------------------------------------------------------
@@ -297,167 +296,162 @@ void AbrirFormularioSobre() {
 
 //---------------------------------------------------------------------------
 void TEmergencyHelper::CalcularEscala() {
-        double maxX = 0, maxY = 0;
-        TPoint p;
+	double maxX = 0, maxY = 0;
+	TPoint p;
 
-        for (int i = 1; i <= Graph->pegarNumeroVertices(); i++) {
-                p = Graph->pegarPonto(i);
-                if (p.x > maxX)
-                        maxX = p.x;
-                if (p.y > maxY)
-                        maxY = p.y;
+	for (int i = 1; i <= Graph->pegarNumeroVertices(); i++) {
+		p = Graph->pegarPonto(i);
+		if (p.x > maxX) {
+			maxX = p.x;
         }
-        maxX = (ImagemGrafo->Width - 20) / maxX;
-        maxY = (ImagemGrafo->Height - 20) / maxY;
-        escala = min(maxX, maxY);
+		if (p.y > maxY) {
+			maxY = p.y;
+        }
+    }
+    maxX = (ImagemGrafo->Width - 20) / maxX;
+    maxY = (ImagemGrafo->Height - 20) / maxY;
+    escala = min(maxX, maxY);
 }
 
 //---------------------------------------------------------------------------
 void TEmergencyHelper::AcharMelhorRota() {
-	int i, j, k, *caminho1, *caminho2, count;
-        caminho1 = NULL;
-        caminho2 = NULL;
-        i = Graph->acharCentroMaisProximo(acidente);
-        j = acidente;
-        k = Graph->acharCentroEmergenciaMaisProximo(acidente);
+	int i, j, k, *caminho1, *caminho2;
+	caminho1 = NULL;
+	caminho2 = NULL;
+	i = Graph->acharCentroMaisProximo(acidente);
+	j = acidente;
+	k = Graph->acharCentroEmergenciaMaisProximo(acidente);
 
-        if (j == k)
-        	return;
+	if (j == k)
+		return;
 
-	count = 0;
-        if (i != j) {
+	int count = 0;
+	if (i != j) {
 		caminho1 = Graph->acharMelhorCaminho(i, j);
-	        do {
-        		TPoint p1, p2;
-	                p1 = Graph->pegarPonto(caminho1[count]);
-        	        p2 = Graph->pegarPonto(caminho1[count+1]);
-                	p1.x *= escala;
-	                p1.y *= escala;
-        	        p2.x *= escala;
-	                p2.y *= escala;
-        		DesenharAresta(p1, p2, clLime);
-	                count++;
-        	} while (caminho1[count] != j);
+        do {
+			TPoint p1, p2;
+			p1 = Graph->pegarPonto(caminho1[count]);
+			p2 = Graph->pegarPonto(caminho1[count+1]);
+			p1.x *= escala;
+			p1.y *= escala;
+			p2.x *= escala;
+			p2.y *= escala;
+			DesenharAresta(p1, p2, clLime);
+			count++;
+		} while (caminho1[count] != j);
 	}
 
 	count = 0;
-        if (j != k) {
-	        caminho2 = Graph->acharMelhorCaminho(j, k);
-	        do {
-        		TPoint p1, p2;
-                	p1 = Graph->pegarPonto(caminho2[count]);
-	                p2 = Graph->pegarPonto(caminho2[count+1]);
-        	        p1.x *= escala;
-                	p1.y *= escala;
-		         p2.x *= escala;
-                	p2.y *= escala;
-	        	DesenharAresta(p1, p2, clBlue);
-        	        count++;
-	        } while (caminho2[count] != k);
-        }
+    if (j != k) {
+		caminho2 = Graph->acharMelhorCaminho(j, k);
+		do {
+			TPoint p1, p2;
+			p1 = Graph->pegarPonto(caminho2[count]);
+			p2 = Graph->pegarPonto(caminho2[count+1]);
+			p1.x *= escala;
+			p1.y *= escala;
+			p2.x *= escala;
+			p2.y *= escala;
+			DesenharAresta(p1, p2, clBlue);
+			count++;
+		} while (caminho2[count] != k);
+	}
 
 	if (caminho1 != NULL)
-	        delete[] caminho1;
-        if (caminho2 != NULL)
-	        delete[] caminho2;
+		delete[] caminho1;
+    if (caminho2 != NULL)
+		delete[] caminho2;
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TEmergencyHelper::MenuArquivoAbrirClick(TObject *Sender)
 {
-        AbrirGrafo();
+	AbrirGrafo();
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TEmergencyHelper::MenuArquivoSairClick(TObject *Sender)
 {
 	if (Graph != NULL) {
-	        delete Graph;
-                Graph = NULL;
-        }
-        Application->Terminate();
+		delete Graph;
+		Graph = NULL;
+	}
+	Application->Terminate();
 }
 //---------------------------------------------------------------------------
 
 
 void __fastcall TEmergencyHelper::MenuComandoGerarAcidenteClick(TObject *Sender)
 {
-        GerarAcidente();
+	GerarAcidente();
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TEmergencyHelper::ToolButtonAbrirClick(TObject *Sender)
 {
-        AbrirGrafo();
+	AbrirGrafo();
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TEmergencyHelper::MenuArquivoFecharClick(TObject *Sender)
 {
-        FecharGrafo();
+	FecharGrafo();
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TEmergencyHelper::ToolButtonFecharClick(TObject *Sender)
 {
-        FecharGrafo();
+	FecharGrafo();
 }
 //---------------------------------------------------------------------------
 
 
-void __fastcall TEmergencyHelper::MenuComandoDistribuirAmbulanciasClick(
-      TObject *Sender)
+void __fastcall TEmergencyHelper::MenuComandoDistribuirAmbulanciasClick(TObject *Sender)
 {
-	DistribuirAmbulancias();	
+	DistribuirAmbulancias();
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TEmergencyHelper::MenuComandoConstruirHospitaisClick(
-      TObject *Sender)
+void __fastcall TEmergencyHelper::MenuComandoConstruirHospitaisClick(TObject *Sender)
 {
-	ConstruirHospitais();	
+	ConstruirHospitais();
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TEmergencyHelper::MenuComandoAcharMelhorRotaClick(
-      TObject *Sender)
+void __fastcall TEmergencyHelper::MenuComandoAcharMelhorRotaClick(TObject *Sender)
 {
 	AcharMelhorRota();
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TEmergencyHelper::ToolButtonDistribuirAmbulanciasClick(
-      TObject *Sender)
+void __fastcall TEmergencyHelper::ToolButtonDistribuirAmbulanciasClick(TObject *Sender)
 {
-	DistribuirAmbulancias();	
+	DistribuirAmbulancias();
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TEmergencyHelper::ToolButtonConstruirHospitaisClick(
-      TObject *Sender)
+void __fastcall TEmergencyHelper::ToolButtonConstruirHospitaisClick(TObject *Sender)
 {
-	ConstruirHospitais();	
+	ConstruirHospitais();
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TEmergencyHelper::ToolButtonGerarAcidenteClick(
-      TObject *Sender)
+void __fastcall TEmergencyHelper::ToolButtonGerarAcidenteClick(TObject *Sender)
 {
-	GerarAcidente();	
+	GerarAcidente();
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TEmergencyHelper::ToolButtonAcharMelhorRotaClick(
-      TObject *Sender)
+void __fastcall TEmergencyHelper::ToolButtonAcharMelhorRotaClick(TObject *Sender)
 {
-	AcharMelhorRota();	
+	AcharMelhorRota();
 }
 //---------------------------------------------------------------------------
 
 
 void __fastcall TEmergencyHelper::ToolButtonAjudaClick(TObject *Sender)
 {
-	AbrirFormularioSobre();	
+	AbrirFormularioSobre();
 }
 //---------------------------------------------------------------------------
 
@@ -466,4 +460,3 @@ void __fastcall TEmergencyHelper::MenuAjudaSobreClick(TObject *Sender)
 	AbrirFormularioSobre();
 }
 //---------------------------------------------------------------------------
-
