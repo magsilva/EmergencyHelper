@@ -1,0 +1,8 @@
+Emergency Helper
+
+This software calculates the best route for an ambulance get to an accident
+and carry the victims back to an hospital.
+
+It was developed by Marco Aurélio Graciotto Silva <magsilva@gmail.com> and
+Fernando Salles Panont <> as a undergraduation assignment. The language
+used was C++ and the compiler and IDE was Borland C++ Builder.
